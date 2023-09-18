@@ -30,6 +30,6 @@ To get started with this project, this is a prerquisites:
 
 Before you begin, ensure you have met the following requirements:
 
-- [Arduino IDE](https://www.arduino.cc/en/software) installed.
+- [Arduino IDE](https://www.arduino.cc/en/software)/VS Code with PlatformIO installed.
 - An ESP8266 or ESP32 board.
 - A Firebase account.
