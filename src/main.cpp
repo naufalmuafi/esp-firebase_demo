@@ -32,6 +32,8 @@ int count = 0, intValue;
 float floatValue;
 bool signupOK = false;
 
+void blink_led(int n);
+
 void setup()
 {
   Serial.begin(115200);
@@ -66,7 +68,7 @@ void setup()
   {
     Serial.printf("%s\n", config.signer.signupError.message.c_str());
   }
-  digitalWrite(BUILTIN_LED, HIGH);
+  blink_led(3);
 
   /* Assign the callback function for the long running token generation task */
   config.token_status_callback = tokenStatusCallback; // see addons/TokenHelper.h
@@ -87,6 +89,7 @@ void loop()
     // Write an Int number on the database path test/int
     if (Firebase.RTDB.setInt(&fbdo, "test/int", count))
     {
+      blink_led(1);
       Serial.println("PASSED");
       Serial.println("PATH: " + fbdo.dataPath());
       Serial.println("TYPE: " + fbdo.dataType());
@@ -101,6 +104,7 @@ void loop()
     // Write an Float number on the database path test/float
     if (Firebase.RTDB.setFloat(&fbdo, "test/float", 0.01 + random(0, 100)))
     {
+      blink_led(1);
       Serial.println("PASSED");
       Serial.println("PATH: " + fbdo.dataPath());
       Serial.println("TYPE: " + fbdo.dataType());
@@ -119,6 +123,7 @@ void loop()
     {
       if (fbdo.dataType() == "int")
       {
+        blink_led(1);
         intValue = fbdo.intData();
         Serial.print("intValue: ");
         Serial.print(intValue);
@@ -134,6 +139,7 @@ void loop()
     {
       if (fbdo.dataType() == "float")
       {
+        blink_led(1);
         floatValue = fbdo.floatData();
         Serial.print("floatValue: ");
         Serial.print(floatValue);
@@ -146,4 +152,15 @@ void loop()
     }
     Serial.println("");
   }    
+}
+
+void blink_led(int n)
+{
+  for(int i=0; i<=n; i++)
+  {
+    digitalWrite(BUILTIN_LED, HIGH);
+    delay(500);
+    digitalWrite(BUILTIN_LED, LOW);
+    delay(500);
+  }
 }
