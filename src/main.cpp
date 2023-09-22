@@ -32,13 +32,13 @@ int count = 0, intValue;
 float floatValue;
 bool signupOK = false;
 
-void blink_led(int n);
+void blink_led(int n, int t);
 
 void setup()
 {
   Serial.begin(115200);
   pinMode(BUILTIN_LED, OUTPUT);
-  digitalWrite(BUILTIN_LED, LOW);
+  digitalWrite(BUILTIN_LED, HIGH);
 
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.print("Connecting to Wi-Fi");
@@ -68,7 +68,7 @@ void setup()
   {
     Serial.printf("%s\n", config.signer.signupError.message.c_str());
   }
-  blink_led(3);
+  blink_led(3, 300);
 
   /* Assign the callback function for the long running token generation task */
   config.token_status_callback = tokenStatusCallback; // see addons/TokenHelper.h
@@ -89,7 +89,7 @@ void loop()
     // Write an Int number on the database path test/int
     if (Firebase.RTDB.setInt(&fbdo, "test/int", count))
     {
-      blink_led(1);
+      blink_led(1, 300);
       Serial.println("PASSED");
       Serial.println("PATH: " + fbdo.dataPath());
       Serial.println("TYPE: " + fbdo.dataType());
@@ -104,7 +104,7 @@ void loop()
     // Write an Float number on the database path test/float
     if (Firebase.RTDB.setFloat(&fbdo, "test/float", 0.01 + random(0, 100)))
     {
-      blink_led(1);
+      blink_led(1, 300);
       Serial.println("PASSED");
       Serial.println("PATH: " + fbdo.dataPath());
       Serial.println("TYPE: " + fbdo.dataType());
@@ -123,7 +123,7 @@ void loop()
     {
       if (fbdo.dataType() == "int")
       {
-        blink_led(1);
+        blink_led(1, 300);
         intValue = fbdo.intData();
         Serial.print("intValue: ");
         Serial.print(intValue);
@@ -139,7 +139,7 @@ void loop()
     {
       if (fbdo.dataType() == "float")
       {
-        blink_led(1);
+        blink_led(1, 300);
         floatValue = fbdo.floatData();
         Serial.print("floatValue: ");
         Serial.print(floatValue);
@@ -154,13 +154,23 @@ void loop()
   }    
 }
 
-void blink_led(int n)
+void blink_led(int n, int t)
 {
-  for(int i=0; i<=n; i++)
+  unsigned long previousMillis = 0;
+  const long interval = t;
+
+  for(int i=0; i<n; i++)
   {
-    digitalWrite(BUILTIN_LED, HIGH);
-    delay(500);
-    digitalWrite(BUILTIN_LED, LOW);
-    delay(500);
+    unsigned long currentMillis = millis();
+
+    if (currentMillis - previousMillis >= interval)
+    {
+      previousMillis = currentMillis;
+
+      static bool ledState = LOW;
+      ledState = (ledState == LOW) ? HIGH : LOW;
+
+      digitalWrite(BUILTIN_LED, ledState);
+    }
   }
 }
