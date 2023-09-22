@@ -13,8 +13,8 @@
 #include "addons/RTDBHelper.h"
 
 // Insert your network credentials
-#define WIFI_SSID "Rasela 2"
-#define WIFI_PASSWORD "31931066"
+#define WIFI_SSID "Muafi"
+#define WIFI_PASSWORD "pwnya11ya"
 
 // Insert Firebase project API Key
 #define API_KEY "AIzaSyDiCxLsr5mqU880ftRiZSgjG_K21k8iQ6w"
@@ -28,19 +28,23 @@ FirebaseAuth auth;
 FirebaseConfig config;
 
 unsigned long sendDataPrevMillis = 0;
-int count = 0;
+int count = 0, intValue;
+float floatValue;
 bool signupOK = false;
 
 void setup()
 {
   Serial.begin(115200);
+  pinMode(BUILTIN_LED, OUTPUT);
+  digitalWrite(BUILTIN_LED, LOW);
+
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.print("Connecting to Wi-Fi");
   while (WiFi.status() != WL_CONNECTED)
   {
     Serial.print(".");
     delay(300);
-  }
+  }  
   Serial.println();
   Serial.print("Connected with IP: ");
   Serial.println(WiFi.localIP());
@@ -62,6 +66,7 @@ void setup()
   {
     Serial.printf("%s\n", config.signer.signupError.message.c_str());
   }
+  digitalWrite(BUILTIN_LED, HIGH);
 
   /* Assign the callback function for the long running token generation task */
   config.token_status_callback = tokenStatusCallback; // see addons/TokenHelper.h
@@ -71,10 +76,14 @@ void setup()
 }
 
 void loop()
-{
+{  
   if (Firebase.ready() && signupOK && (millis() - sendDataPrevMillis > 15000 || sendDataPrevMillis == 0))
   {
     sendDataPrevMillis = millis();
+
+    /* Store Data to Firebase Database */
+    Serial.println("===== STORE DATA TO FIREBASE =====");
+
     // Write an Int number on the database path test/int
     if (Firebase.RTDB.setInt(&fbdo, "test/int", count))
     {
@@ -101,5 +110,40 @@ void loop()
       Serial.println("FAILED");
       Serial.println("REASON: " + fbdo.errorReason());
     }
-  }
+    Serial.println("");
+
+    /* Read Data from Firebase Database */
+    Serial.println("===== READ DATA FROM FIREBASE =====");
+
+    if (Firebase.RTDB.getInt(&fbdo, "/test/int"))
+    {
+      if (fbdo.dataType() == "int")
+      {
+        intValue = fbdo.intData();
+        Serial.print("intValue: ");
+        Serial.print(intValue);
+        Serial.print("\n");
+      }
+    }
+    else
+    {
+      Serial.println(fbdo.errorReason());
+    }
+
+    if (Firebase.RTDB.getFloat(&fbdo, "/test/float"))
+    {
+      if (fbdo.dataType() == "float")
+      {
+        floatValue = fbdo.floatData();
+        Serial.print("floatValue: ");
+        Serial.print(floatValue);
+        Serial.print("\n");
+      }
+    }
+    else
+    {
+      Serial.println(fbdo.errorReason());
+    }
+    Serial.println("");
+  }    
 }
